@@ -1,0 +1,38 @@
+from Crypto.Cipher import DES3
+from Crypto.Util.Padding import pad, unpad
+import random
+
+def xor_bytes(a, b):
+    return bytes(x ^ y for x, y in zip(a, b))
+
+def triple_des_encrypt_block(block, key):
+    cipher1 = DES3.new(key[:8], DES3.MODE_ECB)
+    cipher2 = DES3.new(key[8:16], DES3.MODE_ECB)
+    cipher3 = DES3.new(key[16:], DES3.MODE_ECB)
+    step1 = cipher1.encrypt(block)
+    step2 = cipher2.decrypt(step1)
+    step3 = cipher3.encrypt(step2)
+    return step3
+
+def triple_des_decrypt_block(block, key):
+    cipher3 = DES3.new(key[16:], DES3.MODE_ECB)
+    cipher2 = DES3.new(key[8:16], DES3.MODE_ECB)
+    cipher1 = DES3.new(key[:8], DES3.MODE_ECB)
+    step1 = cipher3.decrypt(block)
+    step2 = cipher2.encrypt(step1)
+    step3 = cipher1.decrypt(step2)
+    return step3
+
+def encrypt_cbc_3des(message, key, iv):
+    padded = pad(message.encode(), 8)
+    blocks = [padded[i:i+8] for i in range(0, len(padded), 8)]
+    ciphertext = b''
+    prev = iv
+    for block in blocks:
+        xored = xor_bytes(block, prev)
+        enc = triple_des_encrypt_block(xored, key)
+        ciphertext += enc
+        prev = enc
+    return ciphertext
+
+def decrypt_cbc_3des(ciphertext, key
