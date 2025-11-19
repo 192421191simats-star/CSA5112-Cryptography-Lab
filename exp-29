@@ -1,0 +1,56 @@
+from Crypto.Cipher import AES
+from Crypto.Random import get_random_bytes
+
+BLOCK_SIZE = 8
+
+def pad(data):
+    pad_len = BLOCK_SIZE - len(data) % BLOCK_SIZE
+    return data + bytes([pad_len] * pad_len)
+
+def unpad(data):
+    pad_len = data[-1]
+    return data[:-pad_len]
+
+def ecb_encrypt(blocks):
+    key = get_random_bytes(16)
+    cipher = AES.new(key, AES.MODE_ECB)
+    return [cipher.encrypt(pad(b)) for b in blocks]
+
+def ecb_decrypt(blocks):
+    key = get_random_bytes(16)
+    cipher = AES.new(key, AES.MODE_ECB)
+    return [unpad(cipher.decrypt(b)) for b in blocks]
+
+def cbc_encrypt(blocks, iv):
+    key = get_random_bytes(16)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    ciphertext = []
+    prev = iv
+    for b in blocks:
+        block = bytes(x ^ y for x, y in zip(pad(b), prev))
+        enc = cipher.encrypt(block)
+        ciphertext.append(enc)
+        prev = enc
+    return ciphertext
+
+def cbc_decrypt(blocks, iv):
+    key = get_random_bytes(16)
+    cipher = AES.new(key, AES.MODE_CBC, iv)
+    plaintext = []
+    prev = iv
+    for b in blocks:
+        dec = cipher.decrypt(b)
+        block = bytes(x ^ y for x, y in zip(dec, prev))
+        plaintext.append(unpad(block))
+        prev = b
+    return plaintext
+
+# Simulated 3 blocks of plaintext
+P1 = b'BLOCK001'
+P2 = b'BLOCK002'
+P3 = b'BLOCK003'
+blocks = [P1, P2, P3]
+iv = b'INITVCTR'
+
+# ECB mode
+ecb_ct = ecb_encrypt(block
