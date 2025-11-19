@@ -1,0 +1,43 @@
+def generate_keys(key):
+    # Dummy key schedule for illustration
+    K1 = key[:8]
+    K2 = key[1:9]
+    return K1, K2
+
+def fk(bits, key):
+    # Dummy function: XOR with key
+    return ''.join(str(int(b)^int(k)) for b, k in zip(bits, key))
+
+def sdes_encrypt_block(block, K1, K2):
+    temp = fk(block, K1)
+    return fk(temp, K2)
+
+def ctr_encrypt(plaintext, key, counter_start):
+    K1, K2 = generate_keys(key)
+    blocks = [plaintext[i:i+8] for i in range(0, len(plaintext), 8)]
+    ciphertext = ''
+    counter = int(counter_start, 2)
+    for block in blocks:
+        counter_bin = format(counter, '08b')
+        keystream = sdes_encrypt_block(counter_bin, K1, K2)
+        cipher_block = ''.join(str(int(b)^int(k)) for b, k in zip(block, keystream))
+        ciphertext += cipher_block
+        counter += 1
+    return ciphertext
+
+def ctr_decrypt(ciphertext, key, counter_start):
+    # Same as encryption in CTR mode
+    return ctr_encrypt(ciphertext, key, counter_start)
+
+# --- Example usage ---
+key = '011111101'
+counter_start = '000000000000000000000000000000100'
+plaintext = '00000000100000001000000100'
+expected_cipher = '001110000100110111101010'
+
+ciphertext = ctr_encrypt(plaintext, key, counter_start)
+print("Encrypted:", ciphertext)
+print("Matches expected:", ciphertext == expected_cipher)
+
+decrypted = ctr_decrypt(ciphertext, key, counter_start)
+print("Decrypted:", decrypted)
