@@ -1,0 +1,49 @@
+import itertools
+import string
+
+def build_substitution_map(ciphertext):
+    # Count frequency of each letter in ciphertext
+    freq = {}
+    for c in ciphertext:
+        if c in string.ascii_uppercase:
+            freq[c] = freq.get(c, 0) + 1
+    # Sort letters by frequency
+    sorted_letters = sorted(freq.items(), key=lambda x: x[1], reverse=True)
+    return [item[0] for item in sorted_letters]
+
+def score_plaintext(text):
+    # Simple scoring based on frequency of common English letters
+    common_letters = 'ETAOINSHRDLCUMWFGYPBVKJXQZ'
+    score = 0
+    for c in text:
+        if c in common_letters:
+            score += (26 - common_letters.index(c))  # Higher score for more common letters
+    return score / len(text)
+
+def generate_candidates(ciphertext, top_n=10):
+    cipher_order = build_substitution_map(ciphertext)
+    candidates = []
+
+    # Try permutations of top 7 letters mapped to top 7 English letters
+    english_freq_order = 'ETAOINSHRDLCUMWFGYPBVKJXQZ'
+    for perm in itertools.permutations(english_freq_order[:7], len(cipher_order[:7])):
+        mapping = dict(zip(cipher_order[:7], perm))
+        # Fill remaining with identity
+        for c in string.ascii_uppercase:
+            if c not in mapping:
+                mapping[c] = c
+        # Apply mapping
+        plaintext = ''.join(mapping[c] for c in ciphertext)
+        score = score_plaintext(plaintext)
+        candidates.append((plaintext, score))
+
+    candidates.sort(key=lambda x: x[1], reverse=True)
+    return candidates[:top_n]
+
+# Example usage
+ciphertext = "WKH HDJOH KDV ODQGHG"  # Caesar shift of 3
+top_plaintexts = generate_candidates(ciphertext, top_n=10)
+
+print("Top 10 guesses:")
+for i, (text, score) in enumerate(top_plaintexts, 1):
+    print(f"{i}. Score={score:.4f}: {text}")
