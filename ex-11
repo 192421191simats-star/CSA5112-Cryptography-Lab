@@ -1,0 +1,23 @@
+from Crypto.Hash import HMAC, SHA256
+
+# Message and key (16 bytes = 128 bits)
+msg = b'MAC block in bytes'
+key = b'secretkey1234567'
+
+# Create HMAC object and compute MAC
+h = HMAC.new(key, SHA256)
+h.update(msg)
+mac = h.digest()
+print("MAC:", mac.hex())
+
+# Forged message (same length as original)
+forged_msg = b'MAC block in bytez'
+
+# Verify MAC
+try:
+    h2 = HMAC.new(key, SHA256)
+    h2.update(forged_msg)
+    h2.verify(mac)
+    print("MAC Verified: True")
+except ValueError:
+    print("MAC Verified: False, Forged message!")
