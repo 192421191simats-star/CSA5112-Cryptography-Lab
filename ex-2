@@ -1,0 +1,39 @@
+python
+def preprocess(text):
+    return ''.join(filter(str.isalpha, text.lower()))
+
+def encrypt_otp_vigenere(plaintext, key):
+    plaintext = preprocess(plaintext)
+    ciphertext = []
+    for p, k in zip(plaintext, key):
+        shift = (ord(p) - ord('a') + k) % 26
+        ciphertext.append(chr(shift + ord('A')))
+    return ''.join(ciphertext)
+
+def recover_key(plaintext, ciphertext):
+    plaintext = preprocess(plaintext)
+    ciphertext = preprocess(ciphertext)
+    key = []
+    for p, c in zip(plaintext, ciphertext):
+        shift = (ord(c) - ord(p)) % 26
+        key.append(shift)
+    return key
+
+# Part (a): Encrypt "send more money" with given key
+plaintext_a = "send more money"
+key_a = [9, 0, 1, 7, 23, 15, 21, 14, 11, 11, 2, 8, 9]
+ciphertext_a = encrypt_otp_vigenere(plaintext_a, key_a)
+
+# Part (b): Recover key to decrypt ciphertext_a into "cash not needed"
+target_plaintext_b = "cash not needed"
+recovered_key_b = recover_key(target_plaintext_b, ciphertext_a)
+
+print("Part (a):")
+print("Plaintext: ", plaintext_a.upper())
+print("Key: ", key_a)
+print("Ciphertext: ", ciphertext_a)
+
+print("\nPart (b):")
+print("Target Plaintext: ", target_plaintext_b.upper())
+print("Ciphertext: ", ciphertext_a)
+print("Recovered Key: ", recovered_key_b)
