@@ -1,0 +1,21 @@
+def permute(bits, pattern):
+    return ''.join(bits[i] for i in pattern)
+
+def xor(a, b):
+    return ''.join(str(int(x)^int(y)) for x, y in zip(a, b))
+
+def generate_keys(key):
+    # Dummy key schedule for illustration
+    return key[:8], key[1:9]
+
+def fk(bits, key):
+    # Dummy function: XOR with key
+    return xor(bits, key)
+
+def sdes_encrypt(block, K1, K2):
+    IP = [1, 5, 2, 0, 3, 7, 4, 6]
+    IP_inv = [3, 0, 2, 4, 6, 1, 7, 5]
+    block = permute(block, IP)
+    block = fk(block, K1)
+    block = block[4:] + block[:4]
+    block = fk(block
