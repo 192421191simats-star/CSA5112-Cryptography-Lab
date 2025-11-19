@@ -1,0 +1,16 @@
+def create_cipher_alphabet(keyword):
+    keyword = ''.join(sorted(set(keyword.upper()), key=keyword.index))
+    full = keyword + ''.join(c for c in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' if c not in keyword)
+    return dict(zip('ABCDEFGHIJKLMNOPQRSTUVWXYZ', full))
+
+def encrypt(plaintext, cipher_map):
+    return ''.join(cipher_map.get(c.upper(), c) for c in plaintext)
+
+# Example usage
+keyword = "CIPHER"
+cipher_map = create_cipher_alphabet(keyword)
+plaintext = "HELLO WORLD"
+ciphertext = encrypt(plaintext, cipher_map)
+
+print("Cipher alphabet:", cipher_map)
+print("Encrypted:", ciphertext)
