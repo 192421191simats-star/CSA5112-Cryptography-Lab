@@ -1,0 +1,50 @@
+import string
+from collections import Counter
+
+# English letter frequency (approximate)
+english_freq = {
+    'A': 8.2, 'B': 1.5, 'C': 2.8, 'D': 4.3, 'E': 13.0, 'F': 2.2, 'G': 2.0,
+    'H': 6.1, 'I': 7.0, 'J': 0.15, 'K': 0.77, 'L': 4.0, 'M': 2.4, 'N': 6.7,
+    'O': 7.5, 'P': 1.9, 'Q': 0.095, 'R': 6.0, 'S': 6.3, 'T': 9.1, 'U': 2.8,
+    'V': 0.98, 'W': 2.4, 'X': 0.15, 'Y': 2.0, 'Z': 0.074
+}
+
+def shift_text(text, key):
+    result = []
+    for char in text:
+        if char.isalpha():
+            base = ord('A') if char.isupper() else ord('a')
+            shifted = (ord(char) - base - key) % 26
+            result.append(chr(shifted + base))
+        else:
+            result.append(char)
+    return ''.join(result)
+
+def score_text(text):
+    freq = Counter(filter(str.isalpha, text.upper()))
+    total = sum(freq.values())
+    if total == 0:
+        return 0
+    score = 0
+    for letter in string.ascii_uppercase:
+        observed = (freq[letter] / total) * 100
+        expected = english_freq.get(letter, 0)
+        score += abs(observed - expected)
+    return score
+
+def frequency_attack(ciphertext, top_n=10):
+    candidates = []
+    for key in range(26):
+        decrypted = shift_text(ciphertext, key)
+        score = score_text(decrypted)
+        candidates.append((key, decrypted, score))
+    candidates.sort(key=lambda x: x[2])  # lower score = better match
+    return candidates[:top_n]
+
+# Example usage
+ciphertext = "WKH HDJOH KDV ODQGHG"  # Caesar shift of 3
+top_plaintexts = frequency_attack(ciphertext, top_n=10)
+
+print("Top 10 guesses:")
+for rank, (key, text, score) in enumerate(top_plaintexts, 1):
+    print(f"{rank}. Key={key}: {text}")
